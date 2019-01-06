@@ -47,10 +47,7 @@
                 $character_name = strtoupper(build_str(clean_str($conn, $_GET['name'])));
 
                 # Prepare and run query
-                $sql_query = "SELECT * FROM characters WHERE name = ".$character_name."";
-
-                # Return characters matching query
-                response(200, "ok", get_characters($sql_query, $conn, $characters));
+                $sql_query = "SELECT * FROM characters WHERE upper(name) = ".$character_name."";
             }
             else
             {
@@ -60,22 +57,44 @@
                     # User name
                     $user_name = strtoupper(clean_str($conn, $_GET['user']));
 
-                    # Prepare and run query
-                    $sql_query = "SELECT * FROM characters WHERE upper(userId) = '".$user_name."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                    # Filter by character's level
+                    if(!empty($_GET['level']))
+                    {
+                        # Level
+                        $char_level = clean_str($conn, $_GET['level']);
 
-                    # Return characters matching query
-                    response(200, "ok", get_characters($sql_query, $conn, $characters));
+                        # Prepare and run query
+                        $sql_query = "SELECT * FROM characters WHERE upper(userId) = '".$user_name."' AND level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);    
+                    }
+                    else
+                    {
+                        # Prepare and run query
+                        $sql_query = "SELECT * FROM characters WHERE upper(userId) = '".$user_name."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                    }
                 }
                 # Get all characters (limited to page)
                 else
                 {
-                    # Prepare and run query
-                    $sql_query = "SELECT * FROM characters ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                    # Filter by character's level
+                    if(!empty($_GET['level']))
+                    {
+                        # Level
+                        $char_level = clean_str($conn, $_GET['level']);
 
-                    # Return characters matching query
-                    response(200, "ok", get_characters($sql_query, $conn, $characters));
+                        # Prepare and run query
+                        $sql_query = "SELECT * FROM characters WHERE level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                    }
+                    else
+                    {
+                        # Prepare and run query
+                        $sql_query = "SELECT * FROM characters ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                    }
                 }
             }
+
+            # Return characters matching query
+            response(200, "ok", get_characters($sql_query, $conn, $characters));
+
         }
         else
         {

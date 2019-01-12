@@ -7,6 +7,7 @@
 
     header("Content-Type:application/json");
     require "../config.php";
+    require "../game.php";
     require "../misc.php";
 
     # Create connection
@@ -64,7 +65,7 @@
                         $char_level = clean_str($conn, $_GET['level']);
 
                         # Prepare and run query
-                        $sql_query = "SELECT * FROM characters WHERE upper(userId) = '".$user_name."' AND level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);    
+                        $sql_query = "SELECT * FROM characters WHERE upper(userId) = '".$user_name."' AND level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
                     }
                     else
                     {
@@ -106,57 +107,5 @@
     {
         # Return error
         response(500, "Unable to connect to the database", NULL);
-    }
-
-    # Execute query, push characters to array and return it
-    function get_characters($sql_query, $sql_conn, $characters)
-    {
-
-        # Execute query
-        $result = mysqli_query($sql_conn, $sql_query);
-
-        # Check if there were results
-        if (mysqli_num_rows($result) > 0)
-        {
-            # Loop thru characters
-            while ($row = mysqli_fetch_assoc($result))
-            {
-
-                # Build character data
-                $character = [
-                    "name" => $row["name"],
-                    "userId" => $row["userId"],
-                    "creation" => $row["creation"],
-                    "battleCount" => (int)$row["battleCount"],
-                    "lastBattle" => $row["lastBattle"],
-                    "level" => (int)$row["level"],
-                    "experience" => (int)$row["experience"],
-                    "power" => (int)$row["power"],
-                    "agility" => (int)$row["agility"],
-                    "speed" => (int)$row["speed"],
-                    "endurance" => (int)$row["endurance"],
-                    "initiative" => (int)$row["initiative"],
-                    "multigrap" => (int)$row["multigrap"],
-                    "counterattack" => (int)$row["counterattack"],
-                    "evasion" => (int)$row["evasion"],
-                    "anticipation" => (int)$row["anticipation"],
-                    "blocking" => (int)$row["blocking"],
-                    "armor" => (int)$row["armor"],
-                    "disarm" => (int)$row["disarm"],
-                    "accuracy" => (int)$row["accuracy"],
-                    "correctness" => (int)$row["correctness"]
-                ];
-
-                # TODO: Add 'skills' to character, which is an array of skills.
-                # TODO: Add 'pets' to character, which is an array of pets.
-                # TODO: Add 'weapons' to character, which is an array of weapons.
-
-                # Push character to characters array
-                array_push($characters, $character);
-            }
-        }
-
-        # Return array of JSON characters
-        return $characters;
     }
 ?>

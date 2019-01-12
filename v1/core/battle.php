@@ -7,6 +7,7 @@
 
     header("Content-Type:application/json");
     require "../config.php";
+    require "../game.php";
     require "../misc.php";
 
     # Create connection

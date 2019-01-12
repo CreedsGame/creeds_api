@@ -20,37 +20,6 @@
         }
     }
 
-    # Validate API token
-    function validate_api_token($sql_conn, $token)
-    {
-        # Check for empty token
-        if ($token == "")
-        {
-            return false;
-        }
-
-        # SQL token
-        $sql_token = build_str($token);
-
-        # Prepare and run query
-        $sql_query = "SELECT * FROM api_tokens WHERE token = ".$sql_token." ORDER BY token";
-
-        # Execute query
-        $result = mysqli_query($sql_conn, $sql_query);
-
-        # Check if there were results
-        if (mysqli_num_rows($result) > 0)
-        {
-            # TODO: Update count and lastUsage?
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-
-    }
-
     # Return cleaned up string for SQL
     function clean_str($conn, $string)
     {

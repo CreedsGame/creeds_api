@@ -1,4 +1,12 @@
 <?php
+
+    /*
+        creeds_api - misc.py
+        Misc functions
+        
+        Contribute on https://github.com/CreedsGame/creeds_api
+    */
+
     # Build JSON HTTP response
     function response($status, $status_message, $data)
     {

@@ -1,5 +1,14 @@
 <?php
+
+    /*
+        creeds_api - misc.py
+        API and game related functions
+        
+        Contribute on https://github.com/CreedsGame/creeds_api
+    */
+
     # Validate API token
+    # TODO: maybe validate if token belongs to current user, receiving user as param
     function validate_api_token($sql_conn, $token)
     {
         # Check for empty token
@@ -31,8 +40,10 @@
     }
 
     # Execute query, push characters to array and return it
-    function get_characters($sql_query, $sql_conn, $characters)
+    function get_characters($sql_query, $sql_conn)
     {
+        # Array for characters
+        $characters = [];
 
         # Execute query
         $result = mysqli_query($sql_conn, $sql_query);

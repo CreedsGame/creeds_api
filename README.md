@@ -1,5 +1,5 @@
 # creeds_api
-REST API main repository
+Main API repository
 
 ## License
 GNU GPL v3

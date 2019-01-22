@@ -90,4 +90,35 @@
         # Return array of JSON characters
         return $characters;
     }
+
+    # Execute query, push tokens to array and return it
+    function get_tokens($sql_query, $sql_conn)
+    {
+        # Array for tokens
+        $tokens = [];
+
+        # Execute query
+        $result = mysqli_query($sql_conn, $sql_query);
+
+        # Check if there were results
+        if (mysqli_num_rows($result) > 0)
+        {
+            # Loop thru tokens
+            while ($row = mysqli_fetch_assoc($result))
+            {
+                # Build token data
+                $token = [
+                    "token" => $row["token"],
+                    "count" => (int)$row["count"],
+                    "lastUsage" => $row["lastUsage"]
+                ];
+
+                # Push token to tokens array
+                array_push($tokens, $token);
+            }
+        }
+
+        # Return array of JSON tokens
+        return $tokens;
+    }
 ?>

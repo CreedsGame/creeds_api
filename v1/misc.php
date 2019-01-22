@@ -39,4 +39,10 @@
     {
         return "'".$string."'";
     }
+
+    # Return a hashed string
+    function string_to_hash($string)
+    {
+        return md5($string);
+    }
 ?>

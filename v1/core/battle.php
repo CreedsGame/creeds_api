@@ -24,22 +24,23 @@
 
         # Get API token
         $token = "";
-        if (!empty($_GET['token']))
+        if (!empty($_POST['token']))
         {
-            $token = clean_str($conn, $_GET['token']);
+            $token = clean_str($conn, $_POST['token']);
         }
 
         # Validate API token
         if (validate_api_token($conn, $token))
         {
             # Check for fighter
-            if (!empty($_GET['fighter']))
+            if (!empty($_POST['fighter']))
             {
                 # Get current fighter
-                $fighter = clean_str($conn, $_GET['fighter']);
+                $fighter = clean_str($conn, $_POST['fighter']);
 
                 # Fighter vs. specific opponent
-                if (!empty($_GET['opponent']) && ($fighter == $_GET['opponent'])) {
+                if (!empty($_POST['opponent']) && ($fighter == $_POST['opponent']))
+                {
                     # Return error
                     response(403, "Fighter and opponent must be different", NULL);
                 }
@@ -57,10 +58,11 @@
                 if (count($fighter_stats) > 0)
                 {
                     # Fighter vs. specific opponent
-                    if (!empty($_GET['opponent'])) {
+                    if (!empty($_POST['opponent']))
+                    {
 
                         # Get current opponent
-                        $opponent = clean_str($conn, $_GET['opponent']);
+                        $opponent = clean_str($conn, $_POST['opponent']);
 
                         # Opponent's name to upper for query
                         $opponent_upper = strtoupper(build_str($opponent));
@@ -83,40 +85,59 @@
                         $first_greater_level = get_characters($sql_query, $conn);
                         
                         # Check if there's any with greater level, if not, we try with lower level
-                        if (count($first_greater_level) > 0) {
-                            # TODO: Prepare query to get first 10 (greater level)
-                            $sql_query = "";
+                        if (count($first_greater_level) > 0)
+                        {
+                            # Get needed level (equal/greater)
+                            $needed_level = $first_greater_level[0]["level"];
                         }
-                        else {
+                        else
+                        {
                             # Prepare query to get first with lower level
-                            $sql_query = "SELECT * FROM characters WHERE upper(name) <> ".$fighter_upper." AND level < ".$fighter_level." ORDER BY level LIMIT 1";
+                            $sql_query = "SELECT * FROM characters WHERE upper(name) <> ".$fighter_upper." AND level < ".$fighter_level." ORDER BY level DESC LIMIT 1";
 
                             # Get first with equal/greater level
                             $first_lower_level = get_characters($sql_query, $conn);
 
-                            if (count($first_lower_level) > 0) {
-                                # TODO: Prepare query to get first 10 (lower level)
-                                $sql_query = "";
+                            if (count($first_lower_level) > 0)
+                            {
+                                # Get needed level (lower)
+                                $needed_level = $first_lower_level[0]["level"];
                             }
-                            else {
-                                # Return error
-                                # This would only happen if there's only one registered character, but just in case.
+                            else
+                            {
+                                # Return error (would only happen if there's only one registered character)
                                 response(403, "Couldn't find an opponent", NULL);
                             }
                         }
 
-                        # TODO: Run query already defined to get first 10
-                        $first_ten_suitable = [];
-                        # TODO: Randomly get one between them and load array on $opponent_stats
-                        # TODO: Test case when there's only one character
+                        # Prepare query to get first 20 possible opponents
+                        $sql_query = "SELECT * FROM characters WHERE upper(name) <> ".$fighter_upper." AND level = ".$needed_level." LIMIT 20";
 
-                        response(403, "Not implemented, please specify an opponent", NULL);
+                        # Get first 10 possible opponents
+                        $first_ten_suitable = get_characters($sql_query, $conn);
+
+                        # Checking again just in case
+                        if (count($first_ten_suitable) > 0)
+                        {
+
+                            # Empty array to return
+                            $opponent_stats = [];
+
+                            # Select one random opponent
+                            array_push($opponent_stats, $first_ten_suitable[rand(0,count($first_ten_suitable)-1)]);
+
+                        }
+                        else
+                        {
+                            # Return error (would only happen if our previously retrieved character just got deleted)
+                            response(403, "Couldn't find an opponent", NULL);
+                        }
                     }
 
                     # Check opponent stats
                     if (count($opponent_stats) > 0)
                     {
-                        # TODO: Function to fight between two creeds array, and return a dict
+                        # TODO: Add here our function to start a fight between these creeds
                         response(200, "ok", $opponent_stats);
                     }
                     else
@@ -130,7 +151,6 @@
                     # Return error
                     response(403, "No stats found for fighter", NULL);
                 }
-
             }
             else
             {

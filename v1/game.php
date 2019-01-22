@@ -36,7 +36,6 @@
         {
             return false;
         }
-
     }
 
     # Execute query, push characters to array and return it
@@ -54,7 +53,6 @@
             # Loop thru characters
             while ($row = mysqli_fetch_assoc($result))
             {
-
                 # Build character data
                 $character = [
                     "name" => $row["name"],

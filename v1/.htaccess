@@ -1,3 +1,7 @@
 RewriteEngine On
 RewriteRule ^battle/([a-zA-Z_-]*)$ core/battle.php$1 [NC,L]
 RewriteRule ^character/([a-zA-Z_-]*)$ core/character.php$1 [NC,L]
+RewriteRule ^login/([a-zA-Z_-]*)$ core/login.php$1 [NC,L]
+RewriteRule ^battle$ core/battle.php [NC,L]
+RewriteRule ^character$ core/character.php [NC,L]
+RewriteRule ^login$ core/login.php [NC,L]

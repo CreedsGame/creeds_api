@@ -12,7 +12,7 @@
     {
         header("HTTP/1.1 ".$status);
 
-        $response['success'] = $status == 200 ? true : false;
+        $response['success'] = ($status == 200);
         $response['status'] = $status;
         $response['status_message'] = $status_message;
         $response['data'] = $data;

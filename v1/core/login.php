@@ -16,29 +16,20 @@
     $conn = mysqli_connect($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 
     # Check connection
-    if ($conn) {
-
+    if ($conn)
+    {
         # Charset to handle unicode
         $conn->set_charset('utf8mb4');
         mysqli_set_charset($conn, 'utf8mb4');
 
         # Get user and password
-        if (!empty($_POST['user']) && (!empty($_POST['pass']) || !empty($_POST['secure_pass'])))
+        if (!empty($_POST['user']) && !empty($_POST['pass']))
         {
             # Get user
             $user = build_str(clean_str($conn, $_POST['user']));
 
-            # Get password
-            if (!empty($_POST['pass']))
-            {
-                # Password's hash
-                $pass_hash = build_str(string_to_hash(clean_str($conn, $_POST['pass'])));
-            }
-            else
-            {
-                # Password's hash
-                $pass_hash = build_str($_POST['secure_pass']);
-            }
+            # Password's hash
+            $pass_hash = build_str(string_to_hash(clean_str($conn, $_POST['pass'])));
 
             # Prepare query to validate login
             $sql_query = "SELECT * FROM users WHERE userId = ".$user." AND password = ".$pass_hash."";
@@ -58,13 +49,13 @@
             else
             {
                 # Return error
-                response(403, "Invalid username or password", NULL);
+                response(401, "Invalid username or password", NULL);
             }
         }
         else
         {
             # Return error
-            response(403, "Unspecified username or password", NULL);
+            response(400, "Unspecified username or password", NULL);
         }
     }
     else

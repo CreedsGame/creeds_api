@@ -16,8 +16,8 @@
     $conn = mysqli_connect($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 
     # Check connection
-    if ($conn) {
-
+    if ($conn)
+    {
         # Charset to handle unicode
         $conn->set_charset('utf8mb4');
         mysqli_set_charset($conn, 'utf8mb4');
@@ -28,11 +28,8 @@
             # Get user
             $user = build_str(clean_str($conn, $_POST['user']));
 
-            # Get password
-            $pass = clean_str($conn, $_POST['pass']);
-
             # Password's hash
-            $pass_hash = build_str(string_to_hash($pass));
+            $pass_hash = build_str(string_to_hash(clean_str($conn, $_POST['pass'])));
 
             # Prepare query to validate login
             $sql_query = "SELECT * FROM users WHERE userId = ".$user." AND password = ".$pass_hash."";
@@ -46,43 +43,19 @@
                 # Prepare query to get user's tokens
                 $sql_query = "SELECT * FROM api_tokens WHERE userId = ".$user."";
 
-                # Execute query
-                $result = mysqli_query($conn, $sql_query);
-
-                # Empty array for user's tokens
-                $tokens = [];
-
-                # Check if there were results
-                if (mysqli_num_rows($result) > 0)
-                {
-                    # Loop thru tokens
-                    while ($row = mysqli_fetch_assoc($result))
-                    {
-                        # Build token data
-                        $token = [
-                            "token" => $row["token"],
-                            "count" => (int)$row["count"],
-                            "lastUsage" => $row["lastUsage"]
-                        ];
-
-                        # Push token to tokens array
-                        array_push($tokens, $token);
-                    }
-                }
-
-                # Return OK
-                response(200, "ok", $tokens);
+                # Return tokens matching query
+                response(200, "ok", get_tokens($sql_query, $conn));
             }
             else
             {
                 # Return error
-                response(403, "Invalid username or password", NULL);
+                response(401, "Invalid username or password", NULL);
             }
         }
         else
         {
             # Return error
-            response(403, "Unspecified username or password", NULL);
+            response(400, "Unspecified username or password", NULL);
         }
     }
     else

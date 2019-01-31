@@ -25,60 +25,46 @@
         # Get current HTTP method
         $method = $_SERVER['REQUEST_METHOD'];
 
-        # Get API token
-        $token = "";
+        # Create a new random character (HTTP PUT) or return characters matching criteria (HTTP POST)
         if ($method == "PUT")
         {
             # Get incoming data
             parse_str(file_get_contents("php://input"), $put_vars);
-            if (!empty($put_vars['token']))
-            {
-                $token = clean_str($conn, $put_vars['token']);
-            }
-        }
-        else
-        {
-            if (!empty($_POST['token']))
-            {
-                $token = clean_str($conn, $_POST['token']);
-            }
-        }
 
-        # Validate API token
-        if (validate_api_token($conn, $token))
-        {
-            # Create a new random character (HTTP PUT) or return characters matching criteria (HTTP POST)
-            if ($method == "PUT")
+            # Check for empty character's name
+            if (!empty($put_vars['name']))
             {
-                # Check for empty character's name
-                if (!empty($put_vars['name']))
+                # Get received character's name
+                $character_name = $put_vars['name'];
+
+                # Check for empty password
+                if (!empty($put_vars['password']))
                 {
-                    # Get received character's name
-                    $character_name = $put_vars['name'];
+                    # Get received password
+                    $password = $put_vars['password'];
 
                     # Validate character's name
                     if (validate_character_name($character_name))
                     {
-                        # Check if character's name already exists
-                        if (check_character_name($conn, $character_name))
+                        # Validate password
+                        if (validate_password($password))
                         {
-                            # Try to get current token's user
-                            $current_user = get_token_user($conn, $token);
-                            if (!empty($current_user))
+                            # Check if character's name already exists
+                            if (check_character_name($conn, $character_name))
                             {
                                 # Create and return a new character
-                                response(200, "ok", create_character($conn, $character_name, $current_user));
+                                response(200, "ok", create_character($conn, $character_name, $password));
                             }
                             else
                             {
                                 # Return error
-                                response(400, "Couldn't get token's user", NULL);
+                                response(400, "Character's name already exists", NULL);
                             }
                         }
                         else
                         {
                             # Return error
-                            response(400, "Character's name already exists", NULL);
+                            response(400, "Invalid password", NULL);
                         }
                     }
                     else
@@ -90,76 +76,51 @@
                 else
                 {
                     # Return error
-                    response(400, "Unspecified character's name", NULL);
+                    response(400, "Unspecified password", NULL);
                 }
             }
             else
             {
-                # Get page
-                $page = 0;
-                if (!empty($_POST['page'])) {
-                    $page = (int)$_POST['page'];
-                }
-
-                # Character name direct search
-                if (!empty($_POST['name']))
-                {
-                    # Character name
-                    $character_name = strtoupper(build_str(clean_str($conn, $_POST['name'])));
-
-                    # Prepare query
-                    $sql_query = "SELECT * FROM characters WHERE upper(name) = ".$character_name."";
-                }
-                else
-                {
-                    # User's characters search
-                    if (!empty($_POST['user']))
-                    {
-                        # User name
-                        $user_name = strtoupper(clean_str($conn, $_POST['user']));
-
-                        # Filter by character's level
-                        if (!empty($_POST['level']))
-                        {
-                            # Level
-                            $char_level = clean_str($conn, $_POST['level']);
-
-                            # Prepare query
-                            $sql_query = "SELECT * FROM characters WHERE upper(userId) = '".$user_name."' AND level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
-                        }
-                        else
-                        {
-                            # Prepare query
-                            $sql_query = "SELECT * FROM characters WHERE upper(userId) = '".$user_name."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
-                        }
-                    }
-                    # Get all characters (limited to page)
-                    else
-                    {
-                        # Filter by character's level
-                        if (!empty($_POST['level']))
-                        {
-                            # Level
-                            $char_level = clean_str($conn, $_POST['level']);
-
-                            # Prepare query
-                            $sql_query = "SELECT * FROM characters WHERE level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
-                        }
-                        else
-                        {
-                            # Prepare query
-                            $sql_query = "SELECT * FROM characters ORDER BY creation LIMIT 10 OFFSET ".($page*10);
-                        }
-                    }
-                }
-                # Return characters matching query
-                response(200, "ok", get_characters($sql_query, $conn));
+                # Return error
+                response(400, "Unspecified character's name", NULL);
             }
         }
         else
         {
-            # Return error
-            response(401, "Unauthorized or invalid API token", NULL);
+            # Get page
+            $page = 0;
+            if (!empty($_GET['page'])) {
+                $page = (int)$_GET['page'];
+            }
+
+            # Character name direct search
+            if (!empty($_GET['name']))
+            {
+                # Character name
+                $character_name = strtoupper(build_str(clean_str($conn, $_GET['name'])));
+
+                # Prepare query
+                $sql_query = "SELECT * FROM characters WHERE upper(name) = ".$character_name."";
+            }
+            else
+            {
+                # Filter by character's level
+                if (!empty($_GET['level']))
+                {
+                    # Level
+                    $char_level = clean_str($conn, $_GET['level']);
+
+                    # Prepare query
+                    $sql_query = "SELECT * FROM characters WHERE level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                }
+                else
+                {
+                    # Prepare query
+                    $sql_query = "SELECT * FROM characters ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                }
+            }
+            # Return characters matching query
+            response(200, "ok", get_characters($sql_query, $conn));
         }
     }
     else

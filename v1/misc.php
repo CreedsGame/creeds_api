@@ -12,20 +12,14 @@
     {
         header("HTTP/1.1 ".$status);
 
+        $response['success'] = ($status == 200);
         $response['status'] = $status;
         $response['status_message'] = $status_message;
         $response['data'] = $data;
 
         $json_response = json_encode($response);
 
-        if ($status <> 200)
-        {
-            die ($json_response);
-        }
-        else
-        {
-            echo $json_response;
-        }
+        die ($json_response);
     }
 
     # Return cleaned up string for SQL

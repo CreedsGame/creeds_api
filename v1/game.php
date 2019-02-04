@@ -186,17 +186,70 @@
 
         # Build outcome
         $outcome = [
-            "fighter" => $players[0],
-            "opponent" => $players[1],
+            "id" => get_battle_id($players[0]["name"]),
+            "creation" => "",
+            "fighter" => $players[0]["name"],
+            "opponent" => $players[1]["name"],
             "starting" => $players[$starting_player]["name"],
             "winner" => $players[$winner_player]["name"],
             "loser" => $players[get_next_index($winner_player)]["name"],
-            "life" => $life,
+            "fighterLife" => $players[0]["life"],
+            "opponentLife" => $players[1]["life"],
             "turns" => $turns
         ];
 
         # Return battle result
         return $outcome;
+    }
+
+    # Save battle results to database
+    function save_battle_results($sql_conn, $battle_outcome)
+    {
+        # Get main values
+        $battle_id = build_str($battle_outcome["id"]);
+        $fighter = build_str($battle_outcome["fighter"]);
+        $opponent = build_str($battle_outcome["opponent"]);
+        $starting = build_str($battle_outcome["starting"]);
+        $winner = build_str($battle_outcome["winner"]);
+        $loser = build_str($battle_outcome["loser"]);
+        $fighter_life = $battle_outcome["fighterLife"];
+        $opponent_life = $battle_outcome["opponentLife"];
+
+        # Prepare and run query
+        $sql_query = "INSERT INTO battles(battleId, fighter, opponent, startingPlayer, winner, loser, fighterLife, opponentLife) VALUES({$battle_id}, {$fighter}, {$opponent}, {$starting}, {$winner}, {$loser}, {$fighter_life}, {$opponent_life})";
+
+        # Execute query
+        $result = mysqli_query($sql_conn, $sql_query);
+
+        # Get turns
+        $turns = $battle_outcome["turns"];
+
+        # Loop thru turns
+        foreach($turns as $i => $turn)
+        {
+            # Get values
+            $current_turn = $i + 1;
+            $action = build_str($turns[$i]["action"]);
+            $damage = $turns[$i]["damage"];
+            $executor = build_str($turns[$i]["executor"]);
+            $receiver = build_str($turns[$i]["receiver"]);
+
+            # Prepare and run query
+            $sql_query = "INSERT INTO turns(battleId, turn, action, damage, executor, receiver) VALUES({$battle_id}, {$current_turn}, {$action}, {$damage}, {$executor}, {$receiver})";
+
+            # Execute query
+            $result = mysqli_query($sql_conn, $sql_query);
+        }
+
+        # Commit changes
+        mysqli_query($sql_conn, "COMMIT");
+    }
+
+    # Return a battle id
+    function get_battle_id($character_name)
+    {
+        # Format: 'name:current_datetime_hash'
+        return string_to_hash($character_name.":".date('Y-m-d H:i:s'));
     }
 
     # Get next player's index (for convenience)
@@ -225,7 +278,7 @@
     # Get critical hit chance
     function get_critical_hit()
     {
-        return rand(1,10) == 10 ? true : false;
+        return rand(1, 10) == 10;
     }
 
     # Create a random character and return it
@@ -301,6 +354,75 @@
 
         # Return player's life
         return $life;
+    }
+
+    # Execute query, push battles to array and return it
+    function get_battles($sql_query, $sql_conn)
+    {
+        # Array for battles
+        $battles = [];
+
+        # Execute query
+        $result = mysqli_query($sql_conn, $sql_query);
+
+        # Check if there were results
+        if (mysqli_num_rows($result) > 0)
+        {
+            # Loop thru battles
+            while ($row = mysqli_fetch_assoc($result))
+            {
+                # Current battleId to get turns
+                $battle_id = build_str($row["battleId"]);
+
+                # Array for turns
+                $turns = [];
+
+                # Prepare query
+                $sql_query_turns = "SELECT * FROM turns WHERE battleId = ".$battle_id." ORDER BY battleId, turn";
+
+                # Execute query
+                $turns_result = mysqli_query($sql_conn, $sql_query_turns);
+
+                # Check if there were results
+                if (mysqli_num_rows($turns_result) > 0)
+                {
+                    # Loop thru turns
+                    while ($row_turn = mysqli_fetch_assoc($turns_result))
+                    {
+                        # Build turn data
+                        $turn = [
+                            "action" => $row_turn["action"],
+                            "damage" => (int)$row_turn["damage"],
+                            "executor" => $row_turn["executor"],
+                            "receiver" => $row_turn["receiver"],
+                        ];
+
+                        # Push turn to turns array
+                        array_push($turns, $turn);
+                    }
+                }
+
+                # Build battle data
+                $battle = [
+                    "id" => $row["battleId"],
+                    "creation" => $row["creation"],
+                    "fighter" => $row["fighter"],
+                    "opponent" => $row["opponent"],
+                    "starting" => $row["startingPlayer"],
+                    "winner" => $row["winner"],
+                    "loser" => $row["loser"],
+                    "fighterLife" => (int)$row["fighterLife"],
+                    "opponentLife" => (int)$row["opponentLife"],
+                    "turns" => $turns
+                ];
+
+                # Push character to characters array
+                array_push($battles, $battle);
+            }
+        }
+
+        # Return array of JSON battles
+        return $battles;
     }
 
     # Execute query, push characters to array and return it

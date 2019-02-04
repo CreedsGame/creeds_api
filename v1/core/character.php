@@ -85,7 +85,8 @@
                 response(400, "Unspecified character's name", NULL);
             }
         }
-        else
+        # Get existing characters
+        elseif ($method == "GET")
         {
             # Get page
             $page = 0;
@@ -111,16 +112,21 @@
                     $char_level = clean_str($conn, $_GET['level']);
 
                     # Prepare query
-                    $sql_query = "SELECT * FROM characters WHERE level = '".$char_level."' ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                    $sql_query = "SELECT * FROM characters WHERE level = '".$char_level."' ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
                 }
                 else
                 {
                     # Prepare query
-                    $sql_query = "SELECT * FROM characters ORDER BY creation LIMIT 10 OFFSET ".($page*10);
+                    $sql_query = "SELECT * FROM characters ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
                 }
             }
             # Return characters matching query
             response(200, "ok", get_characters($sql_query, $conn));
+        }
+        else
+        {
+            # Return error
+            response(501, "Not implemented", NULL);
         }
     }
     else

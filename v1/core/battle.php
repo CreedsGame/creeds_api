@@ -2,7 +2,7 @@
 
     /*
         creeds_api - battle.py
-        Starts a battle between two creeds, and returns its result
+        Starts a battle between two characters, and returns its result
         
         Contribute on https://github.com/CreedsGame/creeds_api
     */
@@ -62,8 +62,6 @@
                         # Prepare query to get current fighter
                         $sql_query = "SELECT * FROM characters WHERE upper(name) = ".$fighter_upper." AND password = ".$password_hash."";
 
-                        echo $sql_query;
-
                         # Get fighter stats                
                         $fighter_stats = get_characters($sql_query, $conn);
 
@@ -73,7 +71,6 @@
                             # Fighter vs. specific opponent
                             if (!empty($put_vars['opponent']))
                             {
-
                                 # Get current opponent
                                 $opponent = clean_str($conn, $put_vars['opponent']);
 
@@ -148,8 +145,14 @@
                             # Check opponent stats
                             if (count($opponent_stats) > 0)
                             {
+                                # Get battle results
+                                $battle_results = get_battle_results($fighter_stats, $opponent_stats);
+
+                                # Save battle results
+                                save_battle_results($conn, $battle_results);
+
                                 # Return battle's results
-                                response(200, "ok", get_battle_results($fighter_stats, $opponent_stats));
+                                response(200, "ok", $battle_results);
                             }
                             else
                             {
@@ -180,6 +183,44 @@
                 # Return error
                 response(400, "Unspecified fighter", NULL);
             }
+        }
+        # Get existing battle
+        elseif ($method == "GET")
+        {
+            # Get page
+            $page = 0;
+            if (!empty($_GET['page'])) {
+                $page = (int)$_GET['page'];
+            }
+
+            # Battle's ID direct search
+            if (!empty($_GET['id']))
+            {
+                # Battle's ID
+                $battle_id = build_str(clean_str($conn, $_GET['id']));
+
+                # Prepare query
+                $sql_query = "SELECT * FROM battles WHERE battleId = ".$battle_id."";
+            }
+            else
+            {
+                # Filter by fighter
+                if (!empty($_GET['fighter']))
+                {
+                    # Fighter's name
+                    $fighter_name = build_str(clean_str($conn, $_GET['fighter']));
+
+                    # Prepare query
+                    $sql_query = "SELECT * FROM battles WHERE fighter = ".$fighter_name." ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
+                }
+                else
+                {
+                    # Prepare query
+                    $sql_query = "SELECT * FROM battles ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
+                }
+            }
+            # Return characters matching query
+            response(200, "ok", get_battles($sql_query, $conn));
         }
         else
         {

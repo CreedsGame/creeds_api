@@ -15,6 +15,9 @@
             <li>
                 <a href=\"character/\">/character</a> — Return the character(s) information matching the criteria
             </li>
+            <li>
+                <a href=\"login/\">/login</a> — Log in character
+            </li>
         </ul>
         <hr>
         <span style=\"font-size: smaller\">

@@ -10,48 +10,18 @@
     # Validate password
     function validate_password($password)
     {
-        # Check for empty password
-        if ($password == "")
-        {
-            return false;
-        }
-
-        # Check string length
-        if (strlen($password) > 50)
-        {
-            return false;
-        }
-
-        # Return OK
-        return true;
+        # Check for empty password and string length
+        return ($password != "" && strlen($password) <= 50);
     }
 
     # Validate character name
     function validate_character_name($name)
     {
-        # Check for empty name
-        if ($name == "")
-        {
-            return false;
-        }
-
-        # Check string length
-        if (strlen($name) > 30)
-        {
-            return false;
-        }
-
         # Regex for alphanumeric only
         preg_match('/^[a-zA-Z0-9_]*$/', $name, $matches);
 
-        # Check for matches
-        if (count($matches) <= 0)
-        {
-            return false;
-        }
-
-        # Return OK
-        return true;
+        # Check for empty name, string length and alphanumeric
+        return ($name != "" && strlen($name) <= 30 && count($matches) > 0);
     }
 
     # Check if character's name already exists
@@ -67,15 +37,7 @@
         $result = mysqli_query($sql_conn, $sql_query);
 
         # Check if there were results
-        if (mysqli_num_rows($result) > 0)
-        {
-            # Return error
-            return false;
-        }
-        else {
-            # Return OK
-            return true;
-        }
+        return (mysqli_num_rows($result) <= 0);
     }
 
     # Run a battle between two creeds and return its result
@@ -95,15 +57,11 @@
         {
             # Check for both player's initiative
             if ($players[0]["initiative"] > $players[1]["initiative"])
-            {
                 # Fighter has greater initiative
                 $current_player = 0;
-            }
             else
-            {
                 # Opponent has greater initiative
                 $current_player = 1;
-            }
         }
 
         # Keep player who started
@@ -148,9 +106,7 @@
 
             # Life shouldn't be negative
             if ($life[get_next_index($current_player)] < 0)
-            {
                 $life[get_next_index($current_player)] = 0;
-            }
 
             # Get current action
             # TODO: Determine evasion/blocking
@@ -174,15 +130,11 @@
 
         # Determine winner player
         if ($life[0] <= 0)
-        {
             # Opponent won
             $winner_player = 1;
-        }
         else
-        {
             # Fighter won
             $winner_player = 0;
-        }
 
         # Build outcome
         $outcome = [
@@ -257,13 +209,9 @@
     {
         # Switch index
         if ($index == 0)
-        {
             $index = 1;
-        }
         else
-        {
             $index = 0;
-        }
 
         # Return new index
         return $index;

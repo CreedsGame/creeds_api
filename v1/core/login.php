@@ -18,81 +18,56 @@
     $conn = mysqli_connect($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 
     # Check connection
-    if ($conn)
+    if (!$conn)
+        response(500, "Unable to connect to the database", NULL);
+
+    # Charset to handle unicode
+    $conn->set_charset('utf8mb4');
+    mysqli_set_charset($conn, 'utf8mb4');
+
+    # Get current HTTP method
+    $method = $_SERVER['REQUEST_METHOD'];
+
+    # Only HTTP GET supported (for now)
+    if ($method == "GET")
     {
-        # Charset to handle unicode
-        $conn->set_charset('utf8mb4');
-        mysqli_set_charset($conn, 'utf8mb4');
+        # Check for fighter's name
+        if (empty($_GET['name']))
+            response(400, "Unspecified fighter", NULL);
 
-        # Get current HTTP method
-        $method = $_SERVER['REQUEST_METHOD'];
+        # Check for password
+        if (empty($_GET['password']))
+            response(400, "Unspecified password", NULL);
 
-        # Only HTTP GET supported (for now)
-        if ($method == "GET")
-        {
-            # Check for fighter's name
-            if (!empty($_GET['name']))
-            {
-                # Check for password
-                if (!empty($_GET['password']))
-                {
-                    # Get password
-                    $password = $_GET['password'];
+        # Get password
+        $password = $_GET['password'];
 
-                    # Validate password
-                    if (validate_password($password))
-                    {
-                        # Character name
-                        $character_name = strtoupper(build_str(clean_str($conn, $_GET['name'])));
+        # Validate password
+        if (!validate_password($password))
+            response(400, "Invalid password", NULL);
 
-                        # Character password
-                        $character_password = build_str(string_to_hash($_GET['password']));
+        # Character name
+        $character_name = strtoupper(build_str(clean_str($conn, $_GET['name'])));
 
-                        # Prepare query
-                        $sql_query = "SELECT * FROM characters WHERE upper(name) = ".$character_name." AND password = ".$character_password."";
+        # Character password
+        $character_password = build_str(string_to_hash($_GET['password']));
 
-                        # Character's matching (should be one or none)
-                        $characters_matching = get_characters($sql_query, $conn);
+        # Prepare query
+        $sql_query = "SELECT * FROM characters WHERE upper(name) = ".$character_name." AND password = ".$character_password."";
 
-                        # Check if there were any results
-                        if ($characters_matching)
-                        {
-                            # Return OK
-                            response(200, "ok", $characters_matching[0]);
-                        }
-                        else
-                        {
-                            # Return error
-                            response(400, "Invalid login", NULL);
-                        }
-                    }
-                    else
-                    {
-                        # Return error
-                        response(400, "Invalid password", NULL);
-                    }
-                }
-                else
-                {
-                    # Return error
-                    response(400, "Unspecified password", NULL);
-                }
-            }
-            else
-            {
-                # Return error
-                response(400, "Unspecified fighter", NULL);
-            }
-        }
-        else
-        {
-            # Return error
-            response(501, "Not implemented", NULL);
-        }
+        # Character's matching (should be one or none)
+        $characters_matching = get_characters($sql_query, $conn);
+
+        # Check if there were any results
+        if (!$characters_matching)
+            response(400, "Invalid login", NULL);
+
+        # Return OK
+        response(200, "ok", $characters_matching[0]);
     }
     else
     {
         # Return error
-        response(500, "Unable to connect to the database", NULL);
+        response(501, "Not implemented", NULL);
     }
 ?>

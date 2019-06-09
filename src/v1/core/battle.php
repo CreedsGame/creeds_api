@@ -29,8 +29,7 @@
     $method = $_SERVER['REQUEST_METHOD'];
 
     # Only HTTP PUT supported (for now)
-    if ($method == "PUT")
-    {
+    if ($method == "PUT") {
         # Get incoming data
         parse_str(file_get_contents("php://input"), $put_vars);
 
@@ -73,8 +72,7 @@
             response(400, "Invalid fighter's name or password", NULL);
 
         # Fighter vs. specific opponent
-        if (!empty($put_vars['opponent']))
-        {
+        if (!empty($put_vars['opponent'])) {
             # Get current opponent
             $opponent = clean_str($conn, $put_vars['opponent']);
 
@@ -86,9 +84,7 @@
 
             # Get opponent stats                
             $opponent_stats = get_characters($sql_query, $conn);
-        }
-        else
-        {
+        } else {
             # Get fighter level
             $fighter_level = $fighter_stats[0]["level"];
 
@@ -99,13 +95,10 @@
             $first_greater_level = get_characters($sql_query, $conn);
             
             # Check if there's any with greater level, if not, we try with lower level
-            if (count($first_greater_level) > 0)
-            {
+            if (count($first_greater_level) > 0) {
                 # Get needed level (equal/greater)
                 $needed_level = $first_greater_level[0]["level"];
-            }
-            else
-            {
+            } else {
                 # Prepare query to get first with lower level
                 $sql_query = "SELECT * FROM characters WHERE upper(name) <> ".$fighter_upper." AND level < ".$fighter_level." ORDER BY level DESC LIMIT 1";
 
@@ -150,46 +143,35 @@
         # Return battle's results
         response(200, "ok", $battle_results);
         
-    }
-    # Get existing battle
-    elseif ($method == "GET")
-    {
+    } elseif ($method == "GET") {
         # Get page
         $page = 0;
         if (!empty($_GET['page']))
             $page = (int)$_GET['page'];
 
         # Battle's ID direct search
-        if (!empty($_GET['id']))
-        {
+        if (!empty($_GET['id'])) {
             # Battle's ID
             $battle_id = build_str(clean_str($conn, $_GET['id']));
 
             # Prepare query
             $sql_query = "SELECT * FROM battles WHERE battleId = ".$battle_id."";
-        }
-        else
-        {
+        } else {
             # Filter by fighter
-            if (!empty($_GET['fighter']))
-            {
+            if (!empty($_GET['fighter'])) {
                 # Fighter's name
                 $fighter_name = build_str(clean_str($conn, $_GET['fighter']));
-
+                
                 # Prepare query
                 $sql_query = "SELECT * FROM battles WHERE fighter = ".$fighter_name." ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
-            }
-            else
-            {
+            } else {
                 # Prepare query
                 $sql_query = "SELECT * FROM battles ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
             }
         }
         # Return characters matching query
         response(200, "ok", get_battles($sql_query, $conn));
-    }
-    else
-    {
+    } else {
         # Return error
         response(501, "Not implemented", NULL);
     }

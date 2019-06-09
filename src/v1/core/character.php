@@ -29,8 +29,7 @@
     $method = $_SERVER['REQUEST_METHOD'];
 
     # Create a new random character (HTTP PUT) or return characters matching criteria (HTTP POST)
-    if ($method == "PUT")
-    {
+    if ($method == "PUT") {
         # Get incoming data
         parse_str(file_get_contents("php://input"), $put_vars);
 
@@ -63,46 +62,35 @@
         # Create and return a new character
         response(200, "ok", create_character($conn, $character_name, $password));
         
-    }
-    # Get existing characters
-    elseif ($method == "GET")
-    {
+    } elseif ($method == "GET") {
         # Get page
         $page = 0;
         if (!empty($_GET['page']))
             $page = (int)$_GET['page'];
 
         # Character name direct search
-        if (!empty($_GET['name']))
-        {
+        if (!empty($_GET['name'])) {
             # Character name
             $character_name = strtoupper(build_str(clean_str($conn, $_GET['name'])));
 
             # Prepare query
             $sql_query = "SELECT * FROM characters WHERE upper(name) = ".$character_name."";
-        }
-        else
-        {
+        } else {
             # Filter by character's level
-            if (!empty($_GET['level']))
-            {
+            if (!empty($_GET['level'])) {
                 # Level
                 $char_level = clean_str($conn, $_GET['level']);
 
                 # Prepare query
                 $sql_query = "SELECT * FROM characters WHERE level = '".$char_level."' ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
-            }
-            else
-            {
+            } else {
                 # Prepare query
                 $sql_query = "SELECT * FROM characters ORDER BY creation DESC LIMIT 10 OFFSET ".($page*10);
             }
         }
         # Return characters matching query
         response(200, "ok", get_characters($sql_query, $conn));
-    }
-    else
-    {
+    } else {
         # Return error
         response(501, "Not implemented", NULL);
     }

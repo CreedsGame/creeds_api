@@ -48,13 +48,10 @@
 
         # Starting player (using 'initiative' stat)
         $current_player = 0;
-        if ($players[0]["initiative"] == $players[1]["initiative"])
-        {
+        if ($players[0]["initiative"] == $players[1]["initiative"]) {
             # Same initiative, so get it randomly
             $current_player = rand(0,1);
-        }
-        else
-        {
+        } else {
             # Check for both player's initiative
             if ($players[0]["initiative"] > $players[1]["initiative"])
                 # Fighter has greater initiative
@@ -79,8 +76,7 @@
         $modifiers = [$first_difference <= 0 ? 1 : $first_difference + 1, $second_difference <= 0 ? 1 : $second_difference + 1];
 
         # Keep battling until some player dies
-        while ($life[0] > 0 && $life[1] > 0)
-        {
+        while ($life[0] > 0 && $life[1] > 0) {
             # Calculate damage dealt
             # TODO: Consider also single-handed two-handed weapons for 1 or 2 hits, shields (blocking boost) and so on
             # Damage formula: 1 hit = floor(5*sqrt(str/end*atk)*mod*rnd)
@@ -177,8 +173,7 @@
         $turns = $battle_outcome["turns"];
 
         # Loop thru turns
-        foreach($turns as $i => $turn)
-        {
+        foreach($turns as $i => $turn) {
             # Get values
             $current_turn = $i + 1;
             $action = build_str($turns[$i]["action"]);
@@ -314,11 +309,9 @@
         $result = mysqli_query($sql_conn, $sql_query);
 
         # Check if there were results
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             # Loop thru battles
-            while ($row = mysqli_fetch_assoc($result))
-            {
+            while ($row = mysqli_fetch_assoc($result)) {
                 # Current battleId to get turns
                 $battle_id = build_str($row["battleId"]);
 
@@ -332,11 +325,9 @@
                 $turns_result = mysqli_query($sql_conn, $sql_query_turns);
 
                 # Check if there were results
-                if (mysqli_num_rows($turns_result) > 0)
-                {
+                if (mysqli_num_rows($turns_result) > 0) {
                     # Loop thru turns
-                    while ($row_turn = mysqli_fetch_assoc($turns_result))
-                    {
+                    while ($row_turn = mysqli_fetch_assoc($turns_result)) {
                         # Build turn data
                         $turn = [
                             "action" => $row_turn["action"],
@@ -383,11 +374,9 @@
         $result = mysqli_query($sql_conn, $sql_query);
 
         # Check if there were results
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             # Loop thru characters
-            while ($row = mysqli_fetch_assoc($result))
-            {
+            while ($row = mysqli_fetch_assoc($result)) {
                 # Build character data
                 $character = [
                     "name" => $row["name"],

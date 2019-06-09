@@ -29,8 +29,7 @@
     $method = $_SERVER['REQUEST_METHOD'];
 
     # Only HTTP GET supported (for now)
-    if ($method == "GET")
-    {
+    if ($method == "GET") {
         # Check for fighter's name
         if (empty($_GET['name']))
             response(400, "Unspecified fighter", NULL);
@@ -64,9 +63,7 @@
 
         # Return OK
         response(200, "ok", $characters_matching[0]);
-    }
-    else
-    {
+    } else {
         # Return error
         response(501, "Not implemented", NULL);
     }

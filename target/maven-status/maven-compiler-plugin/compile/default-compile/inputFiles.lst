@@ -1,0 +1,10 @@
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\controller\BattleController.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\repository\BattleRepository.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\CreedsApiApplication.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\repository\CharacterRepository.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\model\Character.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\service\CharacterService.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\model\Turn.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\model\Battle.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\controller\CharacterController.java
+D:\SOURCES\creeds_api\src\main\java\com\creeds\api\service\BattleService.java
